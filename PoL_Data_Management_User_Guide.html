@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PoL Microscopy Data Management</title>
+<style>
+  :root {
+    --bg: #ffffff; --text: #1f2933; --muted: #5f6b7a; --line: #e3e7ec;
+    --card: #f7f9fb; --accent: #1a5fb4; --accent-soft: #e8f0fb;
+    --green: #2e8b57; --green-soft: #e8f5ee; --orange: #d9822b; --orange-soft: #fdf1e6;
+    --red: #c0392b; --red-soft: #fdecea; --bar-green: #4fd67a; --bar-orange: #f0a63a; --bar-red: #e0554f;
+    --mail: #ffffff; --mail-text: #222222;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181d; --text: #e4e8ee; --muted: #9aa5b3; --line: #2b323b;
+      --card: #1b2027; --accent: #6ea8fe; --accent-soft: #1e2a3b;
+      --green: #4fd67a; --green-soft: #17271e; --orange: #f0a63a; --orange-soft: #2b2216;
+      --red: #ff6b6b; --red-soft: #2d1a1a; --mail: #f6f7f9; --mail-text: #222222;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14181d; --text: #e4e8ee; --muted: #9aa5b3; --line: #2b323b;
+    --card: #1b2027; --accent: #6ea8fe; --accent-soft: #1e2a3b;
+    --green: #4fd67a; --green-soft: #17271e; --orange: #f0a63a; --orange-soft: #2b2216;
+    --red: #ff6b6b; --red-soft: #2d1a1a; --mail: #f6f7f9; --mail-text: #222222;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+         font: 16px/1.6 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 32px 16px 64px; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 18px; margin-bottom: 8px; }
+  header h1 { margin: 0; font-size: 30px; letter-spacing: -0.3px; line-height: 1.25; }
+  header p { margin: 8px 0 0; color: var(--muted); }
+  nav { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 14px 0 0; font-size: 14px; }
+  nav a { color: var(--accent); text-decoration: none; }
+  nav a:hover { text-decoration: underline; }
+  h2 { margin: 44px 0 10px; font-size: 22px; }
+  h3 { margin: 24px 0 6px; font-size: 17px; }
+  p, li { max-width: 74ch; }
+  ul { padding-left: 22px; } li { margin: 4px 0; }
+  code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13.5px; background: var(--card);
+         border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; word-break: break-word; }
+  .muted { color: var(--muted); }
+
+  .tldr { background: var(--accent-soft); border-left: 4px solid var(--accent); border-radius: 8px;
+          padding: 14px 18px; margin: 18px 0; }
+  .tldr b { color: var(--accent); }
+  .tldr ol { margin: 6px 0 0; padding-left: 22px; }
+
+  .callout { border-radius: 8px; padding: 12px 16px; margin: 16px 0; border-left: 4px solid; }
+  .callout.warn { background: var(--orange-soft); border-color: var(--orange); }
+  .callout.bad { background: var(--red-soft); border-color: var(--red); }
+  .callout.good { background: var(--green-soft); border-color: var(--green); }
+
+  /* email types */
+  .types { display: grid; gap: 10px; margin: 14px 0; }
+  .type { display: grid; grid-template-columns: 1fr; background: var(--card); border: 1px solid var(--line);
+          border-left: 5px solid var(--muted); border-radius: 8px; padding: 12px 16px; }
+  .type.warn { border-left-color: var(--orange); } .type.due { border-left-color: var(--red); }
+  .type.done { border-left-color: var(--muted); } .type.issue { border-left-color: var(--orange); }
+  .type.test { border-left-color: var(--accent); }
+  .subj { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13.5px; color: var(--accent);
+          word-break: break-word; }
+  .type .means { margin: 4px 0 0; }
+  .type .todo { margin: 6px 0 0; font-weight: 600; }
+  .type .todo::before { content: "\2192\00a0"; }
+
+  /* folder trees */
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+  @media (max-width: 680px) { .pair { grid-template-columns: 1fr; } }
+  .tree { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 13.5px; line-height: 1.75;
+          background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px;
+          overflow-x: auto; white-space: pre; }
+  .tree .t { display: block; font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-weight: 700;
+             font-size: 14px; margin-bottom: 4px; white-space: normal; }
+  .tree.good .t { color: var(--green); } .tree.bad .t { color: var(--red); }
+  .tree .ok { color: var(--green); font-weight: 600; } .tree .no { color: var(--red); font-weight: 600; }
+  .tree .c { color: var(--muted); }
+
+  .names { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 15px; }
+  .names th, .names td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .names th { font-size: 12.5px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); font-weight: 600; }
+  .yes { color: var(--green); font-weight: 700; } .nope { color: var(--red); font-weight: 700; }
+
+  /* mock email */
+  .mail { background: var(--mail); color: var(--mail-text); border: 1px solid var(--line); border-radius: 10px;
+          padding: 18px 18px 14px; margin: 16px 0; font: 14px/1.5 Arial, Helvetica, sans-serif; overflow-x: auto; }
+  .mail .hdr { font-size: 12.5px; color: #555; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 12px; }
+  .mail .hello { font-weight: 700; font-size: 15px; margin: 0 0 10px; }
+  .mail p { margin: 0 0 10px; }
+  .mail .box { background: #fdf1e6; border-left: 4px solid #d9822b; border-radius: 4px; padding: 10px 12px; margin: 6px 0 12px; font-size: 13px; }
+  .mail .mono { font-family: Consolas, Menlo, monospace; font-size: 12px; }
+  .mail .grey { color: #6b7280; }
+  .mail table { border-collapse: collapse; width: 100%; font-size: 13px; border: 1px solid #e5e7eb; }
+  .mail th { font-size: 11px; color: #6b7280; text-transform: uppercase; font-weight: normal; text-align: left;
+             padding: 5px 8px; border-bottom: 1px solid #e5e7eb; }
+  .mail td { padding: 5px 8px; vertical-align: middle; }
+  .mail tr.top td { border-top: 1px solid #e5e7eb; }
+  .mail tr.user td { background: #f3f4f6; }
+  .bar { display: flex; width: 90px; height: 10px; background: #e8e8ea; }
+  .bar i { display: block; height: 10px; }
+  .g { background: #4fd67a; } .o { background: #f0a63a; } .r { background: #e0554f; }
+  .lbl-due { color: #c0392b; font-weight: 700; font-size: 11px; } .lbl-up { color: #d9822b; font-weight: 700; font-size: 11px; }
+  .legend { font-size: 12px; color: #555; margin: 2px 0 6px; }
+  .legend span:not(.pin) { display: inline-block; width: 9px; height: 9px; margin: 0 4px 0 8px; }
+  .legend span:not(.pin):first-child { margin-left: 0; }
+  .pin { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%;
+         background: var(--accent); color: #fff; font: 700 11px/1 Arial, sans-serif; margin: 0 3px; vertical-align: middle; }
+  .mail .pin { background: #1a5fb4; }
+  .explain { list-style: none; padding-left: 0; }
+  .explain li { margin: 8px 0; padding-left: 30px; position: relative; }
+  .explain li .pin { position: absolute; left: 0; top: 2px; margin: 0; }
+
+  /* colours */
+  .colours { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 14px 0; }
+  @media (max-width: 620px) { .colours { grid-template-columns: 1fr; } }
+  .col { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+  .col .sw { display: block; height: 10px; border-radius: 3px; margin-bottom: 8px; }
+  .col b { display: block; }
+  .col span { color: var(--muted); font-size: 14.5px; }
+
+  details { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; margin: 8px 0; }
+  summary { cursor: pointer; font-weight: 600; }
+  details p { margin: 8px 0 2px; }
+
+  .contact { background: var(--accent-soft); border-radius: 10px; padding: 16px 18px; margin-top: 30px; }
+  footer { margin-top: 40px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>You got an email from PoL Microscopy Data Management — what does it mean?</h1>
+  <p>A short guide for users of the PoL Microscopy instruments and processing computers. It explains the emails, what you have to do, and how to solve common problems.</p>
+  <nav>
+    <a href="#short">In short</a>
+    <a href="#types">Which email did I get?</a>
+    <a href="#where">Where my data must be</a>
+    <a href="#read">Reading the email</a>
+    <a href="#mistakes">Troubleshooting</a>
+    <a href="#faq">Questions</a>
+  </nav>
+</header>
+
+<div class="tldr" id="short">
+  <b>In short</b>
+  <ol>
+    <li>Storage on the microscope and processing computers is <b>temporary</b>. Data is deleted automatically after a set time.</li>
+    <li>You are warned by email <b>before</b> anything is deleted. Every email tells you the <b>exact deletion date</b>.</li>
+    <li>Copy everything you want to keep to <b>your own storage</b> (group share, project storage, …) before that date.</li>
+    <li>Keep your data in the right place — <b>your email-named folder</b> (and, on processing computers, inside a <b>PROJECT</b> folder).</li>
+    <li>Deleted data <b>cannot be restored</b>.</li>
+  </ol>
+</div>
+
+<!-- ============================================================ -->
+<h2 id="types">Which email did I get?</h2>
+<p>Every email starts with <code>PoL CleanUp - &lt;computer name&gt;:</code>, so you always know which computer it is about. Find your email by its subject:</p>
+
+<div class="types">
+  <div class="type warn">
+    <div class="subj">… N file(s) (… GB) due for deletion on 18 Nov 2026<br>… N PROJECT folder(s) (… GB) due for deletion on 18 Nov 2026</div>
+    <p class="means">A <b>warning</b>. The listed data will be deleted on that date. You get reminders as the date comes closer (e.g. 2 weeks, 1 week, 3 days and 1 day before).</p>
+    <p class="todo">Copy the data you want to keep to your own storage before the date. Data you don’t need: nothing to do.</p>
+  </div>
+  <div class="type due">
+    <div class="subj">… N file(s) have exceeded the …-day retention period<br>… N PROJECT folder(s) have reached the end of their retention period</div>
+    <p class="means">A <b>final notice</b>: this data is already past its time and will be deleted on the next run, usually the next day.</p>
+    <p class="todo">Copy anything you still need today.</p>
+  </div>
+  <div class="type done">
+    <div class="subj">… Done — N file(s) deleted<br>… N PROJECT folder(s) deleted (… GB)</div>
+    <p class="means">The data has been <b>deleted</b>. The attached list shows exactly which files.</p>
+    <p class="todo">Nothing to do. If something important was deleted, contact us — but deleted data cannot be restored.</p>
+  </div>
+  <div class="type issue">
+    <div class="subj">… File issue(s) in your PROJECTS folder</div>
+    <p class="means">Some of your files are <b>not in the right place</b> (processing computers): they are not inside a <code>PROJECT</code> folder. See <a href="#where">Where my data must be</a>.</p>
+    <p class="todo">Move these files into a PROJECT folder (e.g. <code>PROJECT1</code>), or copy them to your own storage and remove them.</p>
+  </div>
+  <div class="type test">
+    <div class="subj">[Cleanup TEST - …] …</div>
+    <p class="means">Any subject starting with <code>[Cleanup TEST</code> is a <b>test</b> by the facility — it checks that emails reach you. Nothing was deleted, and the dates in it are only an example.</p>
+    <p class="todo">Nothing to do.</p>
+  </div>
+</div>
+
+<p class="muted">One email can contain several of these at once, e.g. “1 PROJECT folder deleted” plus a warning for another folder plus file issues.</p>
+
+<!-- ============================================================ -->
+<h2 id="where">Where my data must be</h2>
+<p>On every computer there is a folder called <code>PROJECTS</code>. Inside it, <b>your</b> folder is named exactly like your email address. That name is how the system knows whom to email.</p>
+
+<h3>On a microscope (acquisition) computer</h3>
+<p>Everything goes into your email-named folder. Inside it, you can organise your data however you like. Each file is deleted after the set time (e.g. 42 days after it was last changed).</p>
+<div class="pair">
+  <div class="tree good"><span class="t">✔ Right</span>D:\PROJECTS\
+└── <span class="ok">anna.muster@tu-dresden.de</span>\
+    ├── 2026-10-20_zebrafish\
+    │   └── Position1\T0001.czi
+    └── 2026-11-02_test\…</div>
+  <div class="tree bad"><span class="t">✘ Wrong</span>D:\
+├── <span class="no">Anna</span>\…               <span class="c">← not in PROJECTS</span>
+└── PROJECTS\
+    ├── <span class="no">anna.muster</span>\…     <span class="c">← no email address</span>
+    └── <span class="no">anna.muster@tu-dresden</span>\…
+                            <span class="c">← “.de” missing</span></div>
+</div>
+
+<h3>On a processing computer</h3>
+<p>Inside your email-named folder, every project gets its own <code>PROJECT</code> folder: <code>PROJECT0</code>, <code>PROJECT1</code>, <code>PROJECT2</code>, … A PROJECT folder is kept as a whole for a set time (e.g. at least 90 days after it was created, and 42 days after the last change inside it), then the whole folder is deleted.</p>
+<div class="pair">
+  <div class="tree good"><span class="t">✔ Right</span>P:\PROJECTS\
+└── <span class="ok">anna.muster@tu-dresden.de</span>\
+    ├── <span class="ok">PROJECT1</span>\
+    │   ├── raw\…
+    │   └── analysis\…
+    └── <span class="ok">PROJECT2</span>\…</div>
+  <div class="tree bad"><span class="t">✘ Wrong — reported as “file issue”</span>P:\PROJECTS\
+└── anna.muster@tu-dresden.de\
+    ├── <span class="no">results.xlsx</span>      <span class="c">← loose file</span>
+    ├── <span class="no">fiji-windows-x64.exe</span>
+    ├── <span class="no">my_analysis</span>\…     <span class="c">← not a PROJECT</span>
+    └── <span class="no">PROJECT_1</span>\…       <span class="c">← underscore</span></div>
+</div>
+
+<h3>Which PROJECT folder names work?</h3>
+<table class="names">
+  <tr><th>Folder name</th><th>Counts as PROJECT folder?</th></tr>
+  <tr><td><code>PROJECT1</code>, <code>PROJECT0</code>, <code>PROJECT12</code></td><td class="yes">✔ Yes</td></tr>
+  <tr><td><code>project1</code>, <code>Project2</code></td><td class="yes">✔ Yes (capitalisation doesn’t matter)</td></tr>
+  <tr><td><code>PROJECT_1</code>, <code>PROJECT 1</code>, <code>PROJECT-1</code></td><td class="nope">✘ No — no space, dash or underscore</td></tr>
+  <tr><td><code>PROJECT1_old</code>, <code>PROJECT1 (copy)</code></td><td class="nope">✘ No — nothing after the number</td></tr>
+  <tr><td><code>PROJECT</code>, <code>Projects</code>, <code>MyProject1</code></td><td class="nope">✘ No — “PROJECT” followed directly by a number</td></tr>
+</table>
+
+<div class="callout warn"><b>Why does it matter?</b> Files outside a PROJECT folder are not looked after: you get a “file issue” reminder instead of a proper deletion schedule, and such data is <b>not safe</b> on the computer and could be deleted.</div>
+<div class="callout bad"><b>Typo in your folder name = no emails.</b> If your folder isn’t named exactly like your email address, the system can’t warn you — your data is still cleaned up. Please check the spelling, including the domain (e.g. <code>@tu-dresden.de</code>, <code>@mpi-cbg.de</code>).</div>
+
+<!-- ============================================================ -->
+<h2 id="read">Reading the email</h2>
+<p>A typical warning looks like this (numbers explained below):</p>
+
+<div class="mail" role="img" aria-label="Example warning email">
+  <div class="hdr"><b>Subject:</b> PoL CleanUp - LSM980: 2 PROJECT folder(s) (85.2 GB) due for deletion on 6 Nov 2026<br>
+    <b>Attachment:</b> 📎 PoL_CleanUp_LSM980_full_list_2026-11-03.html <span class="pin">6</span></div>
+  <p class="hello">Dear LSM980 user,</p>
+  <p>2 PROJECT folders (85.2 GB) will be deleted soon, starting 6 Nov 2026. Please move any data you want to keep.</p>
+  <p>Some of your files are not located in the correct PROJECT folder. Please move their contents into a PROJECT folder, as data kept outside a PROJECT folder is not safe and could be deleted. <span class="pin">1</span></p>
+  <div class="box"><b>File issue(s)</b><br>The following item(s) … are located outside of a PROJECT folder:
+    <div class="mono" style="margin-top:6px">results.xlsx <span class="grey">(file, 24.1 KB)</span><br>my_analysis <span class="grey">(folder, 3.2 GB)</span><br><span class="grey" style="font-family:Arial">… and 3 more item(s) — all are listed in the attached file</span></div></div>
+  <p>A PROJECT folder is currently kept for at least 90 days after it was created.</p>
+  <div style="font-weight:700; font-size:13px; margin:12px 0 4px">Your PROJECT folders</div>
+  <div class="legend"><span class="g"></span>Not scheduled for deletion <span class="o"></span>upcoming (≤ 21 days) <span class="r"></span>due (&lt; 1 week) <span class="pin">2</span></div>
+  <table>
+    <tr><th></th><th>Folder / biggest files</th><th>Age</th><th>Last change</th><th style="text-align:right">Size</th><th>Deletion</th></tr>
+    <tr class="user"><td><div class="bar"><i class="g" style="width:45%"></i><i class="o" style="width:25%"></i><i class="r" style="width:30%"></i></div></td>
+        <td colspan="2"><b>P:\PROJECTS\anna.muster@tu-dresden.de</b></td><td class="grey">212 file(s)</td><td style="text-align:right">160.4 GB</td><td class="grey">85.2 GB due or upcoming</td></tr>
+    <tr class="top"><td><div class="bar"><i class="r" style="width:100%"></i></div></td><td><b>PROJECT2</b> <span class="pin">3</span></td>
+        <td>13 weeks (92 days)</td><td>12 Sep 2026</td><td style="text-align:right">48.0 GB</td><td>6 Nov 2026 (in 3 days) <span class="pin">4</span><br><span class="lbl-due">Due</span></td></tr>
+    <tr><td></td><td style="padding-left:22px; font-size:12px; color:#444">raw/stack_0012.czi <span class="pin">5</span></td><td></td><td></td><td style="text-align:right; font-size:12px; color:#444">4.1 GB</td><td></td></tr>
+    <tr><td></td><td colspan="5" style="padding-left:22px; font-size:11px; color:#999">… and 41 more file(s) in this folder (39.2 GB)</td></tr>
+    <tr class="top"><td><div class="bar"><i class="o" style="width:80%"></i></div></td><td><b>PROJECT3</b></td>
+        <td>12 weeks (84 days)</td><td>20 Sep 2026</td><td style="text-align:right">37.2 GB</td><td>17 Nov 2026 (in 14 days)<br><span class="lbl-up">Upcoming</span></td></tr>
+    <tr class="top"><td><div class="bar"><i class="g" style="width:60%"></i></div></td><td><b>PROJECT4</b></td>
+        <td>3 weeks (21 days)</td><td>1 Nov 2026</td><td style="text-align:right">72.0 GB</td><td>1 Feb 2027 (in 90 days)<br><span style="color:#2e8b57; font-size:11px; font-weight:700">Not scheduled for deletion</span></td></tr>
+  </table>
+</div>
+
+<ul class="explain">
+  <li><span class="pin">1</span><b>File issues</b> (processing computers): files that are not in a PROJECT folder. At most 5 are shown; the attachment lists all of them.</li>
+  <li><span class="pin">2</span><b>Colours:</b> green = not scheduled for deletion yet · orange = upcoming (the warning period has started) · red = due, deleted in less than a week.</li>
+  <li><span class="pin">3</span><b>One row per folder</b> — on processing computers per PROJECT folder, on microscope computers per folder in your email folder, most urgent first.</li>
+  <li><span class="pin">4</span><b>Deletion date</b> with a countdown. If a folder’s files have different dates, you see a range, e.g. “4–6 Nov 2026 (in 1–3 days)”.</li>
+  <li><span class="pin">5</span><b>The biggest files</b> of that folder (up to 5), so you see where most of the space is.</li>
+  <li><span class="pin">6</span><b>The attachment</b> lists <b>every</b> file with its deletion date (and, after a deletion, the files that were deleted). It opens in any web browser. Long names are shortened in the email, but complete in the attachment.</li>
+</ul>
+
+<h3>The colours</h3>
+<div class="colours">
+  <div class="col"><span class="sw" style="background:var(--bar-green)"></span><b>Not scheduled for deletion</b><span>Nothing to do yet.</span></div>
+  <div class="col"><span class="sw" style="background:var(--bar-orange)"></span><b>Upcoming</b><span>The warning period has started. Plan to copy what you need.</span></div>
+  <div class="col"><span class="sw" style="background:var(--bar-red)"></span><b>Due (&lt; 1 week)</b><span>Deleted within a week. Copy now.</span></div>
+</div>
+
+<h3>How the dates are calculated</h3>
+<ul>
+  <li><b>Microscope computers:</b> each file is deleted a set number of days after it was <b>last changed</b> (its “modified” date). Opening or viewing a file does not change that date.</li>
+  <li><b>Processing computers:</b> a PROJECT folder is kept at least a set time after it was <b>created</b>, and also a set time after the <b>last change</b> to anything inside it — whichever is later. Working in a project keeps it alive.</li>
+  <li>The exact periods can differ between computers. <b>The date in your email is always the real one.</b></li>
+  <li>Normally, nothing is deleted sooner than 2 weeks after your first warning about it.</li>
+</ul>
+
+<!-- ============================================================ -->
+<h2 id="mistakes">Troubleshooting</h2>
+<details open>
+  <summary>“I moved my data to another folder on the same computer — it was still deleted.”</summary>
+  <p>Moving data around <i>on the computer</i> doesn’t keep it. Copy it to <b>your own storage</b> (group share, project storage, external drive) before the deletion date.</p>
+</details>
+<details>
+  <summary>“My folder name was slightly different, so I never got an email.”</summary>
+  <p>The folder must be named exactly like your email address, e.g. <code>anna.muster@tu-dresden.de</code>. A typo, a missing “.de” or just your name means the system can’t reach you.</p>
+</details>
+<details>
+  <summary>“I put my files directly in my email folder on the processing computer.”</summary>
+  <p>On processing computers, data belongs in a PROJECT folder (<code>PROJECT1</code>, <code>PROJECT2</code>, …). Loose files and other folders are reported as “file issues” and are not looked after.</p>
+</details>
+<details>
+  <summary>“I named my folder PROJECT_1 / Project 1 / PROJECT1_final.”</summary>
+  <p>Only “PROJECT” followed directly by a number counts (capitalisation doesn’t matter). See <a href="#where">the table above</a>.</p>
+</details>
+<details>
+  <summary>“I copied old data onto the computer and it got a warning right away.”</summary>
+  <p>A copy often keeps the original “modified” date of the files, so old data counts as old even if you copied it today. You will normally still get about 2 weeks’ notice before such data is deleted.</p>
+</details>
+
+<!-- ============================================================ -->
+<h2 id="faq">Questions</h2>
+<details>
+  <summary>Can deleted data be restored?</summary>
+  <p>No. Once the deletion email has arrived, the data is gone from that computer. This is why you are warned several times before.</p>
+</details>
+<details>
+  <summary>Why do I get several emails about the same data?</summary>
+  <p>You get reminders as the deletion date comes closer (for example 2 weeks, 1 week, 3 days and 1 day before). Each reminder is sent only once.</p>
+</details>
+<details>
+  <summary>I don’t use this computer — why do I get emails?</summary>
+  <p>Someone created a folder with your email address on it. Check the folder path in the email, and tell us if it isn’t yours.</p>
+</details>
+<details>
+  <summary>How do I open the attachment?</summary>
+  <p>It is a small web page (<code>.html</code>). Open it with any browser — double-click it, or save it and open it. It lists every file with its size and deletion date.</p>
+</details>
+<details>
+  <summary>Some small files aren’t listed — why?</summary>
+  <p>Very small files (e.g. system files like <code>.DS_Store</code> or <code>Thumbs.db</code>) are left out of the emails to keep them readable. They follow the same schedule.</p>
+</details>
+<details>
+  <summary>I need more time for my data.</summary>
+  <p>Contact us before the deletion date — we’ll find a solution.</p>
+</details>
+
+<div class="contact">
+  <b>Questions or problems?</b> Write to <a href="mailto:pol_microscopy@tu-dresden.de">pol_microscopy@tu-dresden.de</a> — please mention the computer name from the email subject.
+</div>
+
+<footer>PoL Microscopy · Physics of Life (PoL), TU Dresden · <a href="https://physics-of-life.tu-dresden.de/polmicro" style="color:inherit">physics-of-life.tu-dresden.de/polmicro</a></footer>
+</div>
+</body>
+</html>
