@@ -133,8 +133,8 @@
 <div class="wrap">
 
 <header>
-  <h1>You got an email from PoL Microscopy Data Management — what does it mean?</h1>
-  <p>A short guide for users of the PoL Microscopy instruments and processing computers. It explains the emails, what you have to do, and how to solve common problems.</p>
+  <h1>You got an email from PoL Microscopy Data Management. What does it mean?</h1>
+  <p>A short guide for users of the PoL Microscopy instruments and processing computers. It explains the emails, data structure rules, and common issues.</p>
   <nav>
     <a href="#short">In short</a>
     <a href="#types">Which email did I get?</a>
@@ -149,32 +149,30 @@
   <b>In short</b>
   <ol>
     <li>Storage on the microscope and processing computers is <b>temporary</b>. Data is deleted automatically after a set time.</li>
-    <li>You are warned by email <b>before</b> anything is deleted. Every email tells you the <b>exact deletion date</b>.</li>
-    <li>Copy everything you want to keep to <b>your own storage</b> (group share, project storage, …) before that date.</li>
-    <li>Keep your data in the right place — <b>your email-named folder</b> (and, on processing computers, inside a <b>PROJECT</b> folder).</li>
+    <li>You are warned by email <b>before</b> anything is deleted. Email tells you the <b>exact deletion date</b>.</li>
+    <li>Copy everything you want to keep to <b>your own storage</b> (group share, project storage, …) before the deletion date.</li>
+    <li>Keep your data in the right place: <b>your email-named folder</b> (and, on processing computers, inside a <b>PROJECT</b> folder).</li>
     <li>Deleted data <b>cannot be restored</b>.</li>
   </ol>
 </div>
 
 <!-- ============================================================ -->
 <h2 id="types">Which email did I get?</h2>
-<p>Every email starts with <code>PoL CleanUp - &lt;computer name&gt;:</code>, so you always know which computer it is about. Find your email by its subject:</p>
+<p>Every email starts with <code>PoL Data Storage - &lt;system name&gt;:</code>, so you always know which acquisition or processing computer it is about. Find your email by its subject:</p>
 
 <div class="types">
   <div class="type warn">
     <div class="subj">… N file(s) (… GB) due for deletion on 18 Nov 2026<br>… N PROJECT folder(s) (… GB) due for deletion on 18 Nov 2026</div>
-    <p class="means">A <b>warning</b>. The listed data will be deleted on that date. You get reminders as the date comes closer (e.g. 2 weeks, 1 week, 3 days and 1 day before).</p>
+    <p class="means">A <b>warning</b>. The listed data will be deleted on that date. You get reminders as the date comes closer (e.g. 2 weeks, 1 week, 3 days and 1 day before). If the computer is switched off for a long time, some reminders are skipped, and the data can be deleted without a further reminder when it is back on. <b>Don’t wait for the last reminder.</b></p>
     <p class="todo">Copy the data you want to keep to your own storage before the date. Data you don’t need: nothing to do.</p>
   </div>
   <div class="type due">
     <div class="subj">… N file(s) have exceeded the …-day retention period<br>… N PROJECT folder(s) have reached the end of their retention period</div>
     <p class="means">A <b>final notice</b>: this data is already past its time and will be deleted on the next run, usually the next day.</p>
-    <p class="todo">Copy anything you still need today.</p>
   </div>
   <div class="type done">
     <div class="subj">… Done — N file(s) deleted<br>… N PROJECT folder(s) deleted (… GB)</div>
     <p class="means">The data has been <b>deleted</b>. The attached list shows exactly which files.</p>
-    <p class="todo">Nothing to do. If something important was deleted, contact us — but deleted data cannot be restored.</p>
   </div>
   <div class="type issue">
     <div class="subj">… File issue(s) in your PROJECTS folder</div>
@@ -182,8 +180,8 @@
     <p class="todo">Move these files into a PROJECT folder (e.g. <code>PROJECT1</code>), or copy them to your own storage and remove them.</p>
   </div>
   <div class="type test">
-    <div class="subj">[Cleanup TEST - …] …</div>
-    <p class="means">Any subject starting with <code>[Cleanup TEST</code> is a <b>test</b> by the facility — it checks that emails reach you. Nothing was deleted, and the dates in it are only an example.</p>
+    <div class="subj">[Data Storage TEST - …] …</div>
+    <p class="means">Any subject starting with <code>[Data Storage TEST</code> is a <b>test</b> by the facility. It checks that emails reach you. Nothing was deleted.</p>
     <p class="todo">Nothing to do.</p>
   </div>
 </div>
@@ -237,16 +235,16 @@
   <tr><td><code>PROJECT</code>, <code>Projects</code>, <code>MyProject1</code></td><td class="nope">✘ No — “PROJECT” followed directly by a number</td></tr>
 </table>
 
-<div class="callout warn"><b>Why does it matter?</b> Files outside a PROJECT folder are not looked after: you get a “file issue” reminder instead of a proper deletion schedule, and such data is <b>not safe</b> on the computer and could be deleted.</div>
-<div class="callout bad"><b>Typo in your folder name = no emails.</b> If your folder isn’t named exactly like your email address, the system can’t warn you — your data is still cleaned up. Please check the spelling, including the domain (e.g. <code>@tu-dresden.de</code>, <code>@mpi-cbg.de</code>).</div>
+<div class="callout warn"><b>Why does it matter?</b> Files outside a PROJECT folder are not looked after: you get a “file issue” reminder instead of a proper deletion schedule, and such data is <b>not safe</b> on the computer and could be deleted in the near future.</div>
+<div class="callout bad"><b>Typo in your folder name = no emails.</b> If your folder isn’t named exactly like your email address, the system can’t warn you, but your data is still cleaned up. Please carefully check the spelling, including the domain (e.g. <code>@tu-dresden.de</code>, <code>@mpi-cbg.de</code>).</div>
 
 <!-- ============================================================ -->
 <h2 id="read">Reading the email</h2>
 <p>A typical warning looks like this (numbers explained below):</p>
 
 <div class="mail" role="img" aria-label="Example warning email">
-  <div class="hdr"><b>Subject:</b> PoL CleanUp - LSM980: 2 PROJECT folder(s) (85.2 GB) due for deletion on 6 Nov 2026<br>
-    <b>Attachment:</b> 📎 PoL_CleanUp_LSM980_full_list_2026-11-03.html <span class="pin">6</span></div>
+  <div class="hdr"><b>Subject:</b> PoL Data Storage - LSM980: 2 PROJECT folder(s) (85.2 GB) due for deletion on 6 Nov 2026<br>
+    <b>Attachment:</b> 📎 PoL_Data_Storage_LSM980_full_list_2026-11-03.html <span class="pin">6</span></div>
   <p class="hello">Dear LSM980 user,</p>
   <p>2 PROJECT folders (85.2 GB) will be deleted soon, starting 6 Nov 2026. Please move any data you want to keep.</p>
   <p>Some of your files are not located in the correct PROJECT folder. Please move their contents into a PROJECT folder, as data kept outside a PROJECT folder is not safe and could be deleted. <span class="pin">1</span></p>
@@ -297,7 +295,7 @@
 <!-- ============================================================ -->
 <h2 id="mistakes">Troubleshooting</h2>
 <details open>
-  <summary>“I moved my data to another folder on the same computer — it was still deleted.”</summary>
+  <summary>“I moved my data to another folder on the same computer but it was still deleted.”</summary>
   <p>Moving data around <i>on the computer</i> doesn’t keep it. Copy it to <b>your own storage</b> (group share, project storage, external drive) before the deletion date.</p>
 </details>
 <details>
@@ -321,19 +319,15 @@
 <h2 id="faq">Questions</h2>
 <details>
   <summary>Can deleted data be restored?</summary>
-  <p>No. Once the deletion email has arrived, the data is gone from that computer. This is why you are warned several times before.</p>
+  <p>No. Once the deletion email has arrived, the data is gone from that computer.</p>
 </details>
 <details>
   <summary>Why do I get several emails about the same data?</summary>
-  <p>You get reminders as the deletion date comes closer (for example 2 weeks, 1 week, 3 days and 1 day before). Each reminder is sent only once.</p>
-</details>
-<details>
-  <summary>I don’t use this computer — why do I get emails?</summary>
-  <p>Someone created a folder with your email address on it. Check the folder path in the email, and tell us if it isn’t yours.</p>
+  <p>You get reminders as the deletion date comes closer (for example 2 weeks, 1 week, 3 days and 1 day before). Each reminder is sent only once. If the computer was switched off for a long time, you may get fewer reminders: the deletion date from the first warning still applies.</p>
 </details>
 <details>
   <summary>How do I open the attachment?</summary>
-  <p>It is a small web page (<code>.html</code>). Open it with any browser — double-click it, or save it and open it. It lists every file with its size and deletion date.</p>
+  <p>It is a small web page (<code>.html</code>). Open it with any browser, double-click it, or save it and open it. It lists every file with its size and deletion date.</p>
 </details>
 <details>
   <summary>Some small files aren’t listed — why?</summary>
@@ -341,11 +335,11 @@
 </details>
 <details>
   <summary>I need more time for my data.</summary>
-  <p>Contact us before the deletion date — we’ll find a solution.</p>
+  <p>Contact us before the deletion date and we’ll find a solution.</p>
 </details>
 
 <div class="contact">
-  <b>Questions or problems?</b> Write to <a href="mailto:pol_microscopy@tu-dresden.de">pol_microscopy@tu-dresden.de</a> — please mention the computer name from the email subject.
+  <b>Questions or problems?</b> Write to <a href="mailto:pol_microscopy@tu-dresden.de">pol_microscopy@tu-dresden.de</a>.
 </div>
 
 <footer>PoL Microscopy · Physics of Life (PoL), TU Dresden · <a href="https://physics-of-life.tu-dresden.de/polmicro" style="color:inherit">physics-of-life.tu-dresden.de/polmicro</a></footer>
